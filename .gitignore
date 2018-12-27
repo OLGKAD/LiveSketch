@@ -15,6 +15,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.meta
+*.avi
+*.mp4
 MANIFEST
 
 # PyInstaller
@@ -105,6 +108,7 @@ venv.bak/
 /UnityPackageManager
 /obj
 /Assembly-CSharp.csproj
-ShapeManipulationMac
+/ShapeManipulationMac.app
 /Assets/alglib-3.10.0.csharp.gpl
+/Assets/Plugins
 
