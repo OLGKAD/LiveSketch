@@ -6,12 +6,18 @@ public class Video : MonoBehaviour {
 	// Global variables
 	UnityEngine.Video.VideoPlayer video1;
 	public int hasBeenProcessed = 0; // 0 - has not. 1 - has been. Is used to determine whether to put
-																	 // interest point rectangles on the video. 
+																	 // interest point rectangles on the video.
 
 	// Use this for initialization
 	void Start () {
 		video1 = GetComponent<UnityEngine.Video.VideoPlayer>();
 		video1.Pause();
+
+		// print video size
+		video1.prepareCompleted += (UnityEngine.Video.VideoPlayer source) =>
+		{
+			Debug.Log("dimensions " + source.texture.width + " x " + source.texture.height); // do with these dimensions as you wish
+		};
 	}
 
 	// Update is called once per frame

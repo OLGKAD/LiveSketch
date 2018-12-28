@@ -15,6 +15,7 @@ public class ButtonControls : MonoBehaviour {
 	GameObject[] constraintPoints;
 	public Button extractMotionBtn;
 	public Button transferMotionBtn;
+	public Button markInterestPointBtn;
 	public Slider slider;
 
 	// C++ functions
@@ -33,6 +34,7 @@ public class ButtonControls : MonoBehaviour {
 		extractMotionBtn.onClick.AddListener(extractMotionBtnOnClick);
 		transferMotionBtn.onClick.AddListener(transferMotionBtnOnClick);
 		slider.onValueChanged.AddListener(onSliderValueChange);
+		markInterestPointBtn.onClick.AddListener(markInterestPointBtnOnClick);
 
 	}
 
@@ -61,5 +63,9 @@ public class ButtonControls : MonoBehaviour {
 	{
 		// display a particular frame
 		videoClass.displayFrame((int) value);
+	}
+
+	void markInterestPointBtnOnClick() {
+		// enter the coordinates of the interest point into the array (to be written into a txt file at the end)
 	}
 }
