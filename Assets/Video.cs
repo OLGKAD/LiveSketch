@@ -14,10 +14,10 @@ public class Video : MonoBehaviour {
 		video1.Pause();
 
 		// print video size
-		video1.prepareCompleted += (UnityEngine.Video.VideoPlayer source) =>
-		{
-			Debug.Log("dimensions " + source.texture.width + " x " + source.texture.height); // do with these dimensions as you wish
-		};
+		// video1.prepareCompleted += (UnityEngine.Video.VideoPlayer source) =>
+		// {
+		// 	Debug.Log("dimensions " + source.texture.width + " x " + source.texture.height); // do with these dimensions as you wish
+		// };
 	}
 
 	// Update is called once per frame
