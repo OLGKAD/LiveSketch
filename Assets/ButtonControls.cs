@@ -11,6 +11,7 @@ public class ButtonControls : MonoBehaviour {
 	// Global variables
 	GameObject meshObject;
 	Video videoClass;
+	UnityEngine.Video.VideoPlayer video;
 	// UnityEngine.Video.VideoPlayer video;
 	Main main;
 	GameObject[] constraintPoints;
@@ -21,6 +22,7 @@ public class ButtonControls : MonoBehaviour {
 	public Button extractMotionBtn;
 	public Button transferMotionBtn;
 	public Button markInterestPointBtn;
+	public Button initializeBtn;
 	public Slider slider;
 	public GameObject interestPoint1;
 
@@ -37,24 +39,27 @@ public class ButtonControls : MonoBehaviour {
 		meshObject = GameObject.Find("mesh");
 		main = meshObject.GetComponent<Main>();
 		videoClass = GameObject.Find("video").GetComponent<Video>();
-		// video = videoClass.video1;
 		constraintPoints = GameObject.FindGameObjectsWithTag("button");
 		extractMotionBtn.onClick.AddListener(extractMotionBtnOnClick);
 		transferMotionBtn.onClick.AddListener(transferMotionBtnOnClick);
 		slider.onValueChanged.AddListener(onSliderValueChange);
 		markInterestPointBtn.onClick.AddListener(markInterestPointBtnOnClick);
+		initializeBtn.onClick.AddListener(initializeBtnOnClick);
 	}
 
-
+	// ERROR: MAKE IT SO THAT IT COULD BE CALLED MULTIPLE TIMES (TO RE-COMPUTE THE PATH AFTER ADDING CORRECTIONS MANUALLY)
 	void extractMotionBtnOnClick()
 	{
-		// Debug.Log("Tracking the interest point in the video");
-		// // all the C++ functions will be called here.
-		// Debug.Log("Reading and compressing the video");
-		// precomputations();
-		// mark_all_interest_points();
-		// Debug.Log("Computing the path");
-		// compute_path();
+		// Debug.Log(pixel_to_position_x(0, (float) 14.4, (int) 50, (int) 15));
+		// Debug.Log(pixel_to_position_y(0, (float) 10.56, (int) 50, (int) 15));
+
+		Debug.Log("Tracking the interest point in the video");
+		// all the C++ functions will be called here.
+		Debug.Log("Reading and compressing the video");
+		precomputations();
+		mark_all_interest_points();
+		Debug.Log("Computing the path");
+		compute_path();
 
 		// save the coordinates of the interest points in an array (extract from the txt file)
 		StreamReader reader = new StreamReader("Unity_C++_communication/computed_path.txt");
@@ -85,14 +90,18 @@ public class ButtonControls : MonoBehaviour {
 	void transferMotionBtnOnClick()
 	{
 			// hide video
-
-			// GameObject.Find("Video")
+			GameObject.Find("Screen").GetComponent<MeshRenderer>().enabled = false;
 
 			// display the mesh
 			meshObject.GetComponent<MeshRenderer>().enabled = true;
 			foreach(GameObject constraintPoint in constraintPoints) {
 				constraintPoint.GetComponent<MeshRenderer>().enabled = true;
 			}
+
+			// hide all unneccessary Buttons
+			extractMotionBtn.gameObject.SetActive(false);
+			markInterestPointBtn.gameObject.SetActive(false);
+			transferMotionBtn.gameObject.SetActive(false);
 
 			// display the mesh again & animate it
 
@@ -101,17 +110,18 @@ public class ButtonControls : MonoBehaviour {
 	void onSliderValueChange(float value)
 	{
 		// display a particular frame
-		videoClass.displayFrame((int) value);
+		// ERROR should be 1. The problem is GetFrameTime and displayFrame do some roundings (time is discreet)
+		// Using 2 instead of 1 might fix it for the first frame, but it might fuck up the rest.
+		videoClass.displayFrame((int) (value + 2)); // +1 because the first frame is skipped in GraphTrackPlugin
 		int current_frame = (int) slider.value;
 
-		videoClass.hasBeenProcessed = 1; // remove
+		// videoClass.hasBeenProcessed = 1; // remove
 		if (videoClass.hasBeenProcessed == 1) {
 			// put the rectangle (interest point) on the right spot
 			interestPoint1.transform.position = new Vector3(interestPointsXCoordinates[current_frame], interestPointsYCoordinates[current_frame], -3);
 		}
 	}
 
-	// Has been tested. Returns the coordinates correctly.
 	void markInterestPointBtnOnClick() {
 		// the point of click is the center of the rectangle.
 		// However patches are defined by their top-left corner => x and y should be adjusted.
@@ -130,7 +140,14 @@ public class ButtonControls : MonoBehaviour {
 		}
 	}
 
+	void initializeBtnOnClick() {
+		video = videoClass.video1;
+		video.frame = 2;
+		initializeBtn.gameObject.SetActive(false);
+	}
+
 	// coordinate transformations between real values and pixels
+	// ALL SEEM TO WORK AS INTENDED
 	int position_to_pixel_x(float position, float screen_size, int scale_factor, int patch_size) {
 		int result = (int) ((screen_size / 2 + position) * scale_factor - patch_size / 2.0);
 		return result;
