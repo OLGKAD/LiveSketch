@@ -18,6 +18,8 @@ public class ButtonControls : MonoBehaviour {
 	int number_of_frames = 45;
 	float[] interestPointsXCoordinates = new float[45]; // depends on the number of frames
 	float[] interestPointsYCoordinates = new float[45];
+	int patch_width = 15;
+	int patch_height = 15;
 
 	public Button extractMotionBtn;
 	public Button transferMotionBtn;
@@ -47,12 +49,12 @@ public class ButtonControls : MonoBehaviour {
 		initializeBtn.onClick.AddListener(initializeBtnOnClick);
 	}
 
-	// ERROR: MAKE IT SO THAT IT COULD BE CALLED MULTIPLE TIMES (TO RE-COMPUTE THE PATH AFTER ADDING CORRECTIONS MANUALLY)
+	// TRY:
+	// 1. Try using 20x20 patches. If results are not accurate for that either, there’s a problem.
+  // 2. Try marking 5 interest points in the same frames (using first GraphTrack and then GraphTrackPlugin)
+	// 		and see if the same values are stored in txt / cout in each case.
 	void extractMotionBtnOnClick()
 	{
-		// Debug.Log(pixel_to_position_x(0, (float) 14.4, (int) 50, (int) 15));
-		// Debug.Log(pixel_to_position_y(0, (float) 10.56, (int) 50, (int) 15));
-
 		Debug.Log("Tracking the interest point in the video");
 		// all the C++ functions will be called here.
 		Debug.Log("Reading and compressing the video");
@@ -76,8 +78,8 @@ public class ButtonControls : MonoBehaviour {
 			x = Convert.ToInt32(xy[1]);
 			y = Convert.ToInt32(xy[2]);
 			// pixel_to_position_x(int pixel, float screen_size, int scale_factor, int patch_size)
-			interestPointsXCoordinates[frame_count] = pixel_to_position_x(x, (float) 14.4, (int) 50, (int) 15);
-			interestPointsYCoordinates[frame_count] = pixel_to_position_y(y, (float) 10.56, (int) 50, (int) 15);
+			interestPointsXCoordinates[frame_count] = pixel_to_position_x(x, (float) 14.4, (int) 50, patch_width);
+			interestPointsYCoordinates[frame_count] = pixel_to_position_y(y, (float) 10.56, (int) 50, patch_height);
 			frame_count++;
 		}
 
@@ -125,8 +127,6 @@ public class ButtonControls : MonoBehaviour {
 	void markInterestPointBtnOnClick() {
 		// the point of click is the center of the rectangle.
 		// However patches are defined by their top-left corner => x and y should be adjusted.
-		int patch_width = 15;
-		int patch_height = 15;
 		// write the coordinates of the interest point into txt file: (frameNumber, x-coordinate, y-coordinate)
 		// using (StreamWriter outputFile = new StreamWriter("Unity_C++_communication/interest_points.txt", true)) {
 		//     outputFile.WriteLine(slider.value + " " + ((int) ((7.2 + interestPoint1.transform.position.x) * 50 - patch_width / 2.0)) + " " +
@@ -135,8 +135,8 @@ public class ButtonControls : MonoBehaviour {
 		float x = interestPoint1.transform.position.x;
 		float y = interestPoint1.transform.position.y;
 		using (StreamWriter outputFile = new StreamWriter("Unity_C++_communication/interest_points.txt", true)) {
-		    outputFile.WriteLine(slider.value + " " + (position_to_pixel_x(x, (float) 14.4, (int) 50, (int) 15)) + " " +
-																									 (position_to_pixel_y(y, (float) 10.56, (int) 50, (int) 15)));
+		    outputFile.WriteLine(slider.value + " " + (position_to_pixel_x(x, (float) 14.4, (int) 50, (int) patch_width)) + " " +
+																									 (position_to_pixel_y(y, (float) 10.56, (int) 50, (int) patch_height)));
 		}
 	}
 
