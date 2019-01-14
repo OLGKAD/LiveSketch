@@ -9,24 +9,29 @@ using System.IO;
 public class ButtonControls : MonoBehaviour {
 
 	// Global variables
+
+	// exposed variables
 	GameObject meshObject;
 	Video videoClass;
-	UnityEngine.Video.VideoPlayer video;
-	// UnityEngine.Video.VideoPlayer video;
-	Main main;
-	GameObject[] constraintPoints;
-	int number_of_frames = 45;
-	float[] interestPointsXCoordinates = new float[45]; // depends on the number of frames
-	float[] interestPointsYCoordinates = new float[45];
-	int patch_width = 15;
-	int patch_height = 15;
-
 	public Button extractMotionBtn;
 	public Button transferMotionBtn;
 	public Button markInterestPointBtn;
 	public Button initializeBtn;
 	public Slider slider;
 	public GameObject interestPoint1;
+	// public GameObject constraintHandle1;
+	public Text frameNumber;
+
+	UnityEngine.Video.VideoPlayer video;
+	Main main;
+	GameObject[] constraintPoints;
+	int number_of_frames = 45;
+	float[] interestPointsXCoordinates = new float[45]; // depends on the number of frames
+	float[] interestPointsYCoordinates = new float[45];
+	public int patch_width = 15;
+	public int patch_height = 15;
+
+
 
 	// C++ functions
 	[DllImport ("GraphTrackPlugin")]
@@ -55,13 +60,13 @@ public class ButtonControls : MonoBehaviour {
 	// 		and see if the same values are stored in txt / cout in each case.
 	void extractMotionBtnOnClick()
 	{
-		Debug.Log("Tracking the interest point in the video");
-		// all the C++ functions will be called here.
-		Debug.Log("Reading and compressing the video");
-		precomputations();
-		mark_all_interest_points();
-		Debug.Log("Computing the path");
-		compute_path();
+		// Debug.Log("Tracking the interest point in the video");
+		// // all the C++ functions will be called here.
+		// Debug.Log("Reading and compressing the video");
+		// precomputations();
+		// mark_all_interest_points();
+		// Debug.Log("Computing the path");
+		// compute_path();
 
 		// save the coordinates of the interest points in an array (extract from the txt file)
 		StreamReader reader = new StreamReader("Unity_C++_communication/computed_path.txt");
@@ -105,9 +110,19 @@ public class ButtonControls : MonoBehaviour {
 			markInterestPointBtn.gameObject.SetActive(false);
 			transferMotionBtn.gameObject.SetActive(false);
 
-			// display the mesh again & animate it
+			// When done
+			videoClass.hasBeenProcessed = 2;
+
+			/* Display the mesh again & animate it.
+			* Will be animated by moving the slider.
+			*/
 
 	}
+
+	void moveObjectToPoint(GameObject object1, Vector3 position) {
+		object1.transform.position = position;
+	}
+
 
 	void onSliderValueChange(float value)
 	{
@@ -116,11 +131,24 @@ public class ButtonControls : MonoBehaviour {
 		// Using 2 instead of 1 might fix it for the first frame, but it might fuck up the rest.
 		videoClass.displayFrame((int) (value + 2)); // +1 because the first frame is skipped in GraphTrackPlugin
 		int current_frame = (int) slider.value;
+		frameNumber.text = current_frame.ToString();
 
-		// videoClass.hasBeenProcessed = 1; // remove
+		// path has been computed
 		if (videoClass.hasBeenProcessed == 1) {
 			// put the rectangle (interest point) on the right spot
 			interestPoint1.transform.position = new Vector3(interestPointsXCoordinates[current_frame], interestPointsYCoordinates[current_frame], -3);
+		// animating the mesh
+		} else if (videoClass.hasBeenProcessed == 2) {
+			/* Display the mesh again & animate it.
+			* Get the coordinates of the arrays: interestPointsXCoordinates, interestPointsYCoordinates.
+			* Use them to animate a single constrain point.
+			*/
+			Vector3 nextPosition = new Vector3(0, 0, -3);
+
+			nextPosition.x = interestPointsXCoordinates[current_frame];
+			nextPosition.y = interestPointsYCoordinates[current_frame];
+			constraintPoints[0].transform.position = nextPosition;
+			main.updateMesh();
 		}
 	}
 
@@ -148,11 +176,11 @@ public class ButtonControls : MonoBehaviour {
 
 	// coordinate transformations between real values and pixels
 	// ALL SEEM TO WORK AS INTENDED
-	int position_to_pixel_x(float position, float screen_size, int scale_factor, int patch_size) {
+	public int position_to_pixel_x(float position, float screen_size, int scale_factor, int patch_size) {
 		int result = (int) ((screen_size / 2 + position) * scale_factor - patch_size / 2.0);
 		return result;
 	}
-	int position_to_pixel_y(float position, float screen_size, int scale_factor, int patch_size) {
+	public int position_to_pixel_y(float position, float screen_size, int scale_factor, int patch_size) {
 		int result = (int) ((screen_size / 2 - position) * scale_factor - patch_size / 2.0);
 		return result;
 	}
