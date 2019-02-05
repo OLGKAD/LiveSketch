@@ -60,13 +60,13 @@ public class ButtonControls : MonoBehaviour {
 	// 		and see if the same values are stored in txt / cout in each case.
 	void extractMotionBtnOnClick()
 	{
-		// Debug.Log("Tracking the interest point in the video");
-		// // all the C++ functions will be called here.
-		// Debug.Log("Reading and compressing the video");
-		// precomputations();
-		// mark_all_interest_points();
-		// Debug.Log("Computing the path");
-		// compute_path();
+		Debug.Log("Tracking the interest point in the video");
+		// all the C++ functions will be called here.
+		Debug.Log("Reading and compressing the video");
+		precomputations();
+		mark_all_interest_points();
+		Debug.Log("Computing the path");
+		compute_path();
 
 		// save the coordinates of the interest points in an array (extract from the txt file)
 		StreamReader reader = new StreamReader("Unity_C++_communication/computed_path.txt");
